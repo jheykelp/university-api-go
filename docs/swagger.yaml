@@ -1,0 +1,215 @@
+basePath: /
+definitions:
+  entity.Course:
+    properties:
+      credits:
+        type: integer
+      department_id:
+        type: integer
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  entity.Student:
+    properties:
+      address:
+        type: string
+      created_at:
+        type: string
+      date_of_birth:
+        type: string
+      email:
+        type: string
+      first_name:
+        type: string
+      id:
+        type: integer
+      last_name:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  handler.enrollmentResponse:
+    properties:
+      course:
+        $ref: '#/definitions/entity.Course'
+      course_id:
+        type: integer
+      deleted_at:
+        type: string
+      enrollment_date:
+        type: string
+      id:
+        type: integer
+      student_id:
+        type: integer
+    type: object
+  handler.errorResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  handler.loginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  handler.meEnrollment:
+    properties:
+      course_id:
+        type: integer
+      course_name:
+        type: string
+      enrollment_date:
+        type: string
+      id:
+        type: integer
+    type: object
+  handler.meResponse:
+    properties:
+      address:
+        type: string
+      date_of_birth:
+        type: string
+      email:
+        type: string
+      enrollments:
+        items:
+          $ref: '#/definitions/handler.meEnrollment'
+        type: array
+      first_name:
+        type: string
+      id:
+        type: integer
+      last_name:
+        type: string
+    type: object
+  handler.registerRequest:
+    properties:
+      address:
+        type: string
+      date_of_birth:
+        description: YYYY-MM-DD
+        type: string
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      password:
+        type: string
+    type: object
+  handler.registerResponse:
+    properties:
+      data:
+        $ref: '#/definitions/entity.Student'
+      message:
+        type: string
+    type: object
+  handler.tokenResponse:
+    properties:
+      token:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: Academic program API (students, courses, enrollments).
+  title: University API
+  version: "1.0"
+paths:
+  /enrollments/{id}:
+    delete:
+      parameters:
+      - description: Enrollment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.enrollmentResponse'
+      security:
+      - Bearer: []
+      summary: Delete (soft) an enrollment
+      tags:
+      - Enrollments
+  /students/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Login payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handler.loginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.tokenResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: Login and get JWT
+      tags:
+      - Students
+  /students/me:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.meResponse'
+      security:
+      - Bearer: []
+      summary: Current student profile
+      tags:
+      - Students
+  /students/register:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Student payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handler.registerRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handler.registerResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: Register new student
+      tags:
+      - Students
+schemes:
+- http
+securityDefinitions:
+  Bearer:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
